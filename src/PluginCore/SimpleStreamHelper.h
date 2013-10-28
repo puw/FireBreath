@@ -90,7 +90,7 @@ namespace FB {
         /// @since 1.7
         /// @see FB::BrowserStreamRequest:setCallback
         ////////////////////////////////////////////////////////////////////////////////////////////////////
-        static FB::SimpleStreamHelperPtr AsyncRequest( const BrowserHostConstPtr& host, const BrowserStreamRequest& req );
+        static FB::SimpleStreamHelperPtr AsyncRequest( const BrowserHostConstPtr& host, BrowserStreamRequest& req );
         ////////////////////////////////////////////////////////////////////////////////////////////////////
         /// @fn  static  FB::SimpleStreamHelperPtr FB::SimpleStreamHelper::AsyncRequest(const BrowserHostConstPtr& host, const BrowserStreamPtr& stream, const BrowserStreamRequest& req);
         ///
@@ -241,7 +241,7 @@ namespace FB {
         /// @author taxilian
         /// @since 1.7
         ////////////////////////////////////////////////////////////////////////////////////////////////////
-        static HttpStreamResponsePtr SynchronousRequest(const FB::BrowserHostPtr& host, const BrowserStreamRequest& req );
+        static HttpStreamResponsePtr SynchronousRequest(const FB::BrowserHostPtr& host, BrowserStreamRequest& req );
         
         ////////////////////////////////////////////////////////////////////////////////////////////////////
         /// @fn public static FB::HttpStreamResponsePtr FB::SimpleStreamHelper::SynchronousPost(const FB::BrowserHostPtr& host, const FB::URI& uri, const std::string& postdata, const bool cache = true, const size_t bufferSize = 128*1024)

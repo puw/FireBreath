@@ -207,7 +207,7 @@ namespace FB
         /// @since 1.7
         /// @see FB::BrowserStreamRequest
         ////////////////////////////////////////////////////////////////////////////////////////////////////
-        virtual BrowserStreamPtr createStream( const BrowserStreamRequest& req, const bool enable_async = true ) const;
+        virtual BrowserStreamPtr createStream( BrowserStreamRequest& req, const bool enable_async = true ) const;
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
         /// @fn virtual BrowserStreamPtr createStream(const std::string& url, const PluginEventSinkPtr& callback,

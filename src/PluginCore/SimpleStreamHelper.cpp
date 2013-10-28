@@ -49,7 +49,7 @@ FB::SimpleStreamHelperPtr FB::SimpleStreamHelper::AsyncPost(const FB::BrowserHos
 }
 
 FB::SimpleStreamHelperPtr FB::SimpleStreamHelper::AsyncRequest( const FB::BrowserHostConstPtr& host,
-                                                                const BrowserStreamRequest& req ) {
+                                                                BrowserStreamRequest& req ) {
     if (!req.getCallback()) {
         throw std::runtime_error("Invalid callback");
     }
@@ -57,10 +57,19 @@ FB::SimpleStreamHelperPtr FB::SimpleStreamHelper::AsyncRequest( const FB::Browse
         // This must be run from the main thread
         return host->CallOnMainThread(boost::bind(&AsyncRequest, host, req));
     }
+
+    FB::SimpleStreamHelperPtr ptr(boost::make_shared<FB::SimpleStreamHelper>(req.getCallback(), req.internalBufferSize));
+    // This is kinda a weird trick; it's responsible for freeing itself, unless something decides
+    // to hold a reference to it.
+    ptr->keepReference(ptr);
+    // Ensure this is set before starting the stream so we don't miss the stream completion event.
+    req.setEventSink(ptr);
+
     FB::BrowserStreamPtr stream(host->createStream(req, false));
-    return AsyncRequest(host, stream, req);
+    return ptr;
 }
 
+// FIXME: this attaches an observer to an existing stream, won't that always risk missing events?
 FB::SimpleStreamHelperPtr FB::SimpleStreamHelper::AsyncRequest( const FB::BrowserHostConstPtr& host,
                                                                 const FB::BrowserStreamPtr& stream,
                                                                 const BrowserStreamRequest& req ) {
@@ -106,7 +115,7 @@ public:
 };
 
 
-FB::HttpStreamResponsePtr FB::SimpleStreamHelper::SynchronousRequest( const FB::BrowserHostPtr& host, const BrowserStreamRequest& req )
+FB::HttpStreamResponsePtr FB::SimpleStreamHelper::SynchronousRequest( const FB::BrowserHostPtr& host, BrowserStreamRequest& req )
 {
     // We can't ever block on the main thread, so SynchronousGet can't be called from there.
     // Also, if you could block the main thread, that still wouldn't work because the request
@@ -115,6 +124,7 @@ FB::HttpStreamResponsePtr FB::SimpleStreamHelper::SynchronousRequest( const FB::
     SyncHTTPHelper helper;
     try {
         FB::HttpCallback cb(boost::bind(&SyncHTTPHelper::getURLCallback, &helper, _1, _2, _3, _4));
+	req.setCallback(cb);
         FB::SimpleStreamHelperPtr ptr = AsyncRequest(host, req);
         helper.setPtr(ptr);
         helper.waitForDone();
